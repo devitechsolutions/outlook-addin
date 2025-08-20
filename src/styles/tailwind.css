@@ -1,0 +1,113 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom component styles */
+@layer components {
+  .btn-primary {
+    @apply bg-primary-500 hover:bg-primary-600 text-white font-medium py-1.5 px-3 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm text-left;
+  }
+  
+  .btn-secondary {
+    @apply bg-primary-400 hover:bg-primary-500 text-white font-medium py-1.5 px-3 rounded-lg transition-colors duration-200 text-sm text-left;
+  }
+  
+  .btn-outline {
+    @apply border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-1.5 px-3 rounded-lg transition-colors duration-200 text-sm text-left;
+  }
+  
+  .input-field {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+  }
+  
+  .card {
+    @apply bg-white border border-gray-200 rounded-lg shadow-sm;
+  }
+  
+  .card-header {
+    @apply px-4 py-3 border-b border-gray-200 bg-gray-50;
+  }
+  
+  .card-body {
+    @apply p-4;
+  }
+}
+
+/* Ensure primary colors are available */
+@layer utilities {
+  .bg-primary-300 {
+    background-color: #66b7db;
+  }
+  
+  .bg-primary-400 {
+    background-color: #339fcf;
+  }
+  
+  .bg-primary-500 {
+    background-color: #0075a8;
+  }
+  
+  .bg-primary-600 {
+    background-color: #005e86;
+  }
+  
+  .hover\:bg-primary-400:hover {
+    background-color: #339fcf;
+  }
+  
+  .hover\:bg-primary-500:hover {
+    background-color: #0075a8;
+  }
+  
+  .hover\:bg-primary-600:hover {
+    background-color: #005e86;
+  }
+  
+  .text-primary-500 {
+    color: #0075a8;
+  }
+  
+  .text-primary-600 {
+    color: #005e86;
+  }
+  
+  .border-primary-500 {
+    border-color: #0075a8;
+  }
+  
+  .ring-primary-500 {
+    --tw-ring-color: #0075a8;
+  }
+  
+  .focus\:ring-primary-500:focus {
+    --tw-ring-color: #0075a8;
+  }
+}
+
+/* Pin-specific styles */
+@layer utilities {
+  .addin-pinned {
+    position: relative !important;
+  }
+  
+  .addin-pinned::after {
+    content: 'PINNED';
+    position: fixed;
+    top: 2px;
+    right: 5px;
+    background: rgba(0, 117, 168, 0.9);
+    color: white;
+    padding: 1px 4px;
+    border-radius: 2px;
+    font-size: 7px;
+    font-weight: bold;
+    z-index: 10001;
+    pointer-events: none;
+    opacity: 0.8;
+  }
+  
+  .pin-button-active {
+    color: #0075a8 !important;
+    background-color: rgba(0, 117, 168, 0.1) !important;
+  }
+}
