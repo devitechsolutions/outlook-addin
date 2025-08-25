@@ -91,7 +91,11 @@ class EntityDetail extends Component {
     const { onCancel } = this.props;
 
     if (loading) {
-      return <LoadingSpinner label="Loading details..." />;
+      return (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <LoadingSpinner label="Loading details..." variant="modern" size="large" />
+        </div>
+      );
     }
 
     return (

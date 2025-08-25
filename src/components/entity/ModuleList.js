@@ -40,7 +40,11 @@ class ModuleList extends Component {
     const { loading, enabledModules } = this.state;
 
     if (loading) {
-      return <LoadingSpinner label="Loading modules..." />;
+      return (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <LoadingSpinner label="Loading modules..." variant="modern" size="large" />
+        </div>
+      );
     }
 
     // enabledModules is an object from the API

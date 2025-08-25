@@ -162,7 +162,7 @@ class AddCommentForm extends Component {
           <h3 className="text-base font-medium text-gray-900 mb-4">Comments</h3>
           
           {loading ? (
-            <LoadingSpinner label="Loading comments..." />
+            <LoadingSpinner label="Loading comments..." variant="modern" size="medium" />
           ) : (
             <div className="space-y-4">
               {Object.entries(comments).map(([key, comment]) => (

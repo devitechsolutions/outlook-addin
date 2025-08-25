@@ -128,7 +128,11 @@ class EntityForm extends Component {
     const { module, onCancel } = this.props;
 
     if (loading) {
-      return <LoadingSpinner label="Loading form..." />;
+      return (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <LoadingSpinner label="Loading form..." variant="modern" size="large" />
+        </div>
+      );
     }
 
     const isEdit = recordDetail && Object.keys(recordDetail).length > 0;

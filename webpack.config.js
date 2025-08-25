@@ -20,7 +20,7 @@ module.exports = async (env, options) => {
     entry: {
       polyfill: ["core-js/stable", "regenerator-runtime/runtime"],
       vendor: ["react", "react-dom", "core-js", "@fluentui/react"],
-      taskpane: ["react-hot-loader/patch", "./src/taskpane/index.js", "./src/taskpane/taskpane.html"],
+      taskpane: ["./src/taskpane/index.js", "./src/taskpane/taskpane.html"],
       commands: "./src/commands/commands.js",
     },
     output: {
@@ -33,20 +33,22 @@ module.exports = async (env, options) => {
       rules: [
         {
           test: /\.jsx?$/,
+          exclude: /node_modules/,
           use: [
-            "react-hot-loader/webpack",
             {
               loader: "babel-loader",
               options: {
-                presets: ["@babel/preset-env"],
+                presets: ["@babel/preset-env", "@babel/preset-react"],
               },
             },
-          ],
-          exclude: /node_modules/,
+          ]
+        },
+        {
+          test: /\.css$/,
+          use: ["style-loader", "css-loader", "postcss-loader"],
         },
         {
           test: /\.html$/,
-          exclude: /node_modules/,
           use: "html-loader",
         },
         {
@@ -56,8 +58,6 @@ module.exports = async (env, options) => {
             filename: "assets/[name][ext][query]",
           },
         },
-        { test: /\.css$/, loader: "style-loader" },
-        { test: /\.css$/, loader: "css-loader" },
       ],
     },
     plugins: [

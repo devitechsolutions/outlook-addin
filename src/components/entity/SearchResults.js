@@ -284,6 +284,7 @@ class SearchResults extends Component {
       preSelectedModule: moduleKey
     });
   };
+
   render() {
     const { results } = this.props;
     const { 
@@ -297,7 +298,25 @@ class SearchResults extends Component {
       searchResults,
       searchLoading
     } = this.state;
-    const totalCount = results.length;
+    
+    // Handle different result formats - could be array or single object
+    let processedResults = [];
+    if (Array.isArray(results)) {
+      if (results.length === 1 && Array.isArray(results[0]) && results[0].length === 0) {
+        // Handle case where results is [Array(0)] - means no results
+        processedResults = [];
+      } else {
+        processedResults = results;
+      }
+    } else if (results && typeof results === 'object' && results.label) {
+      // Single result object
+      processedResults = [results];
+    }
+    
+    const totalCount = processedResults.length;
+    
+    // Debug logging
+    console.log('SearchResults - Results prop:', results, 'Processed results:', processedResults, 'Total count:', totalCount);
     
     // Get email info for create mode
     const { firstname, lastname } = outlookService.parseDisplayName();
@@ -347,20 +366,61 @@ class SearchResults extends Component {
                   <EnvelopeIcon className="w-3 h-3 mr-1" />
                   <span className="truncate">{fromEmail}</span>
                 </div>
+                <div className="mt-2">
+                  <p className="text-xs text-red-600">
+                    No Records Found
+                  </p>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Module List for Creation */}
-          <CreateMode
-            firstname={firstname}
-            lastname={lastname}
-            fromEmail={fromEmail}
-            onCancel={() => this.props.onCheckingMail()}
-            onCheckingMail={this.props.onCheckingMail}
-            onLogout={this.props.onLogout}
-            hideUserCard={true}
-          />
+          {/* No Search Results - Show Add Contact/Lead Buttons */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div className="space-y-3">
+              {/* Add Contact Button */}
+              {enabledModules.Contacts && enabledModules.Contacts.is_create_view_permitted && (
+                <button
+                  onClick={() => this.handleCreateRecord('Contacts')}
+                  className="w-full flex items-center justify-start px-3 py-2 text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 text-sm text-left"
+                  style={{ backgroundColor: '#339fcf' }}
+                  onMouseEnter={(e) => e.target.style.backgroundColor = '#0075a8'}
+                  onMouseLeave={(e) => e.target.style.backgroundColor = '#339fcf'}
+                >
+                  <UserIcon className="w-4 h-4 mr-2" />
+                  Add Contact
+                </button>
+              )}
+              
+              {/* Add Leads Button */}
+              {enabledModules.Leads && enabledModules.Leads.is_create_view_permitted && (
+                <button
+                  onClick={() => this.handleCreateRecord('Leads')}
+                  className="w-full flex items-center justify-start px-3 py-2 text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 text-sm text-left"
+                  style={{ backgroundColor: '#66b7db' }}
+                  onMouseEnter={(e) => e.target.style.backgroundColor = '#339fcf'}
+                  onMouseLeave={(e) => e.target.style.backgroundColor = '#66b7db'}
+                >
+                  <UserIcon className="w-4 h-4 mr-2" />
+                  Add Lead
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Link Email with Other Records */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <button
+              onClick={() => this.setState({ showLinkEmailDialog: true })}
+              className="w-full flex items-center justify-left px-3 py-2 text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 text-sm text-left"
+              style={{ backgroundColor: '#66b7db' }}
+              onMouseEnter={(e) => e.target.style.backgroundColor = '#339fcf'}
+              onMouseLeave={(e) => e.target.style.backgroundColor = '#66b7db'}
+            >
+              <LinkIcon className="w-4 h-4 mr-2" />
+              Link Email with Other Records
+            </button>
+          </div>
 
           {/* Refresh Button */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
@@ -379,6 +439,19 @@ class SearchResults extends Component {
     // Multiple results - show list
     return (
       <div className="space-y-4">
+        {/* Search Results Status Message */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <p className="text-sm text-blue-800">
+            {totalCount > 0 ? (
+              totalCount === 1 
+                ? `1 record found for ${fromEmail}`
+                : `${totalCount} records found for ${fromEmail}`
+            ) : (
+              `No record found for ${fromEmail}`
+            )}
+          </p>
+        </div>
+
         {/* Link Email Dialog */}
         <Transition appear show={showLinkEmailDialog} as={React.Fragment}>
           <Dialog as="div" className="relative z-10" onClose={() => this.setState({ showLinkEmailDialog: false })}>
@@ -474,7 +547,7 @@ class SearchResults extends Component {
                       <div className="max-h-64 overflow-y-auto border border-gray-200 rounded-lg">
                         {searchLoading ? (
                           <div className="p-4 text-center">
-                            <LoadingSpinner label="Searching..." size="small" />
+                            <LoadingSpinner label="Searching..." variant="modern" size="medium" />
                           </div>
                         ) : searchResults.length > 0 ? (
                           <div className="divide-y divide-gray-200">
@@ -552,86 +625,95 @@ class SearchResults extends Component {
           </Dialog>
         </Transition>
 
-        {/* Email Info Card */}
-      
-
-        {/* Search Results List */}
+        {/* Search Results - Show Records with Actions */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          {/* Header */}
-         
-
-          {/* Results List */}
           <div className="divide-y divide-gray-200">
-            {results.map((record, index) => (
-              <div
-                key={index}
-                className="px-4 py-4"
-              >
-                {/* Record Header with ShowHeadFields */}
-                <div className="mb-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1 min-w-0">
-                      <ShowHeadFields data={record} />
+            {processedResults.map((record, index) => (
+              <div key={index} className="px-4 py-4">
+                {/* Email Information */}
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="flex-shrink-0">
+                    <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
+                      <UserIcon className="w-5 h-5 text-primary-600" />
                     </div>
-                    
-                    {/* Action Icons */}
-                    <div className="ml-4 flex items-center space-x-2">
-                      {/* View Details Icon */}
-                      {record.viewable && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            this.props.onRecordSelect(record);
-                          }}
-                          className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                          title="View Details"
-                        >
-                          <EyeIcon className="w-4 h-4" />
-                        </button>
-                      )}
-                      {/* Edit Icon */}
-                      {record.editable && (
-                        <button
-                          className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                          onClick={(e) => this.handleEditClick(e, record)}
-                          title="Edit Record"
-                        >
-                          <PencilIcon className="w-4 h-4" />
-                        </button>
-                      )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-base font-medium text-gray-900 truncate">
+                      {`${firstname} ${lastname}`}
+                    </p>
+                    <div className="flex items-center text-sm text-gray-500">
+                      <EnvelopeIcon className="w-4 h-4 mr-1" />
+                      <span className="truncate">{fromEmail}</span>
                     </div>
+                    {record.module && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        Record found in {record.module}
+                      </p>
+                    )}
+                  </div>
+                  
+                  {/* Action Icons */}
+                  <div className="flex items-center space-x-1">
+                    {/* View Details Icon */}
+                    {record.viewable && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          this.props.onRecordSelect(record);
+                        }}
+                        className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                        title="View Details"
+                      >
+                        <EyeIcon className="w-4 h-4" />
+                      </button>
+                    )}
+                    {/* Edit Icon */}
+                    {record.editable && (
+                      <button
+                        className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                        onClick={(e) => this.handleEditClick(e, record)}
+                        title="Edit Record"
+                      >
+                        <PencilIcon className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
                 </div>
                 
-                {/* Action Buttons */}
-                <div className="w-full">
-                  <button
-                    className="w-full flex items-center justify-left px-3 py-2 text-sm font-medium text-white rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-                    style={{ backgroundColor: '#339fcf' }}
-                    onMouseEnter={(e) => e.target.style.backgroundColor = '#0075a8'}
-                    onMouseLeave={(e) => e.target.style.backgroundColor = '#339fcf'}
-                    onClick={() => this.handleArchiveEmail(record)}
-                    disabled={archivingToRecord === record.crmid}
-                  >
-                    {archivingToRecord === record.crmid ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        Logging...
-                      </>
-                    ) : (
-                      <>
-                        <LinkIcon className="w-4 h-4 mr-2" />
-                        Log Email to {record.label}
-                      </>
-                    )}
-                  </button>
-                </div>
+                {/* Record Info */}
+                
+                
+                {/* Log Email Button - Only show if results found */}
+                {totalCount > 0 && processedResults.length > 0 && record.label && (
+                  <div className="mt-4">
+                    <button
+                      className="w-full flex items-center justify-left px-3 py-2 text-sm font-medium text-white rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 text-left"
+                      style={{ backgroundColor: '#339fcf' }}
+                      onMouseEnter={(e) => e.target.style.backgroundColor = '#0075a8'}
+                      onMouseLeave={(e) => e.target.style.backgroundColor = '#339fcf'}
+                      onClick={() => this.handleArchiveEmail(record)}
+                      disabled={archivingToRecord === record.crmid}
+                    >
+                      {archivingToRecord === record.crmid ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Logging...
+                        </>
+                      ) : (
+                        <>
+                          <ArchiveBoxIcon className="w-4 h-4 mr-2" />
+                          Log Email for {record.label}
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
         </div>
 
-        {/* Email Action Buttons */}
+        {/* Link Email with Other Records */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
           <button
             onClick={() => this.setState({ showLinkEmailDialog: true })}
@@ -645,30 +727,15 @@ class SearchResults extends Component {
           </button>
         </div>
 
-        {/* Other Action Buttons */}
+        {/* Refresh Button */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="space-y-3">
-            {/* Module Creation Buttons */}
-            <div className="space-y-2">
-                           {Object.entries(enabledModules)
-                .filter(([moduleKey, moduleData]) => moduleData.is_create_view_permitted === true)
-                .map(([moduleKey, moduleData]) => {
-                  const displayName = moduleData.display_name || moduleData.label || moduleKey;
-                  return (
-                    <button
-                      key={moduleKey}
-                      onClick={() => this.handleCreateRecord(moduleKey)}
-                      className="w-full flex items-center justify-start px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 hover:border-primary-300 hover:text-primary-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    >
-                      <UserIcon className="w-3 h-3 mr-2" />
-                      Add as {displayName}
-                    </button>
-                  );
-                })}
-            </div>
-            
-           
-          </div>
+          <button
+            className="w-full flex items-center justify-start px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-left"
+            onClick={this.props.onCheckingMail}
+          >
+            <ArrowPathIcon className="w-4 h-4 mr-2" />
+            Refresh Search
+          </button>
         </div>
       </div>
     );

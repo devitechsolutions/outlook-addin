@@ -116,10 +116,9 @@ class Login extends Component {
             <div className="card-body text-center">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex-1"></div>
-                <img src={logo} className="w-16 h-16" alt="Logo" />
+                <img src={logo} className="w-1/2" alt="Logo" />
                 <div className="flex-1"></div>
               </div>
-              <h1 className="text-xl font-bold text-gray-900 mb-2">Revit CRM</h1>
               <p className="text-sm text-gray-600 mb-6">Sign in to your account</p>
               
               <form className="space-y-4 text-left" onSubmit={this.handleSubmit}>

@@ -47,7 +47,11 @@ class Activities extends Component {
     const { onCancel } = this.props;
 
     if (loading) {
-      return <LoadingSpinner label="Loading activities..." />;
+      return (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <LoadingSpinner label="Loading activities..." variant="modern" size="large" />
+        </div>
+      );
     }
 
     return (

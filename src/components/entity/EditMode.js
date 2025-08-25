@@ -396,7 +396,11 @@ class EditMode extends Component {
     const { entity_info, onLogout, onBack } = this.props;
 
     if (loading) {
-      return <LoadingSpinner label="Processing..." />;
+      return (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <LoadingSpinner label="Processing..." variant="modern" size="large" />
+        </div>
+      );
     }
 
     // Convert enabled modules to array for dropdown
